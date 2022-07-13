@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, View, Text , TextInput,ActivityIndicator, FlatList, } from 'react-native';
+import { Button, View, Text , TextInput,ActivityIndicator, FlatList,SafeAreaView } from 'react-native';
 import { NavigationContainer, StackActions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
@@ -27,26 +27,39 @@ import KhanelKhalili from './src/screen/KhanelKhalili'
 
 
 function HomeScreen({ navigation })  {
-
+   
+  const itemURL = "https://reactnative.dev/movies.json";
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
+  const [key, setKey] = useState([]);
+  const [value, setValue] = useState([]);
 
-  const getitem = async () => {
+  useEffect(() => {
+    fetch(itemURL)
+      .then((response) => response.json()) // get response, convert to json
+      .then((json) => {
+        setData(json.data);
+        setKey(json.key);
+        setValue(json.value);
+      })
+      .catch((error) => alert(error)) // display errors
+      .finally(() => setLoading(false)); // change loading state
+  }, []);
+
+  async function getItemsAsync() {
     try {
-     const response = await fetch('https://www.postman.com/collections/4460c9c18f0d3b6c4f51');
-     const json = await response.json();
-     setData(json.item);
-   } catch (error) {
-     console.error(error);
-   } finally {
-     setLoading(false);
-   }
- }
 
- useEffect(() => {
-   getitem();
- }, []);
-
+      let response = await fetch(itemURL);
+      let json = await response.json();
+      setData(json.data);
+      setKey(json.key);
+      setValue(json.value);
+      setLoading(false);
+    } catch (error) {
+      alert(error);
+    }
+  }
+ 
 
   
   return (
@@ -56,15 +69,22 @@ function HomeScreen({ navigation })  {
    
    <View style={{ flex: 1, padding: 24  }}>
       {isLoading ? <ActivityIndicator/> : (
-        <FlatList
-          data={data}
-          keyExtractor={({ id }, index) => id}
-          renderItem={({ item }) => (
-            <Text style={{color:'orange'}}>{item.title}, {item.name}</Text>
-          )}
-        />
+       
+       <FlatList
+            data={data}
+            keyExtractor={({ id }, index) => id}
+            renderItem={({ item }) => (
+              <View style={{ paddingBottom: 10 }}>
+                <Text>
+                  {item.key}. {item.value}, {item.description}
+                </Text>
+                <Text>{description}</Text>
+              </View>
+            )}
+          />
       )}
-    </View>
+      </View>
+   
   
     
 
